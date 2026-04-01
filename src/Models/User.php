@@ -1,6 +1,5 @@
 <?php
 // /src/Models/User.php
-
 require_once __DIR__ . '/../Database.php';
 
 class User {
@@ -10,27 +9,48 @@ class User {
         $this->db = Database::getConnection();
     }
 
-    // Busca um usuário pelo email (usado no Login e para evitar cadastros duplicados)
+    // Adicionado: Cria um novo utilizador
+    public function create($name, $email, $password, $avatar = 'default.png') {
+        $stmt = $this->db->prepare("
+            INSERT INTO users (name, email, password, avatar) 
+            VALUES (:name, :email, :password, :avatar)
+        ");
+        return $stmt->execute([
+            'name' => $name,
+            'email' => $email,
+            'password' => password_hash($password, PASSWORD_DEFAULT), // Hash da senha
+            'avatar' => $avatar
+        ]);
+    }
+
+    // Adicionado: Busca um utilizador pelo email
     public function findByEmail($email) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
         $stmt->execute(['email' => $email]);
         return $stmt->fetch();
     }
 
-    // Cria um novo usuário no banco (usado no Cadastro)
-    public function create($name, $email, $password) {
-        // Criptografa a senha com o algoritmo mais forte disponível no PHP atual (Bcrypt)
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    public function getById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE id = :id LIMIT 1");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch();
+    }
 
-        $stmt = $this->db->prepare("
-            INSERT INTO users (name, email, password) 
-            VALUES (:name, :email, :password)
-        ");
+    public function update($id, $name, $email, $bio, $avatar = null, $password = null) {
+        $sql = "UPDATE users SET name = :name, email = :email, bio = :bio";
+        $params = ['name' => $name, 'email' => $email, 'bio' => $bio, 'id' => $id];
 
-        return $stmt->execute([
-            'name' => $name,
-            'email' => $email,
-            'password' => $hashedPassword
-        ]);
+        if ($avatar) {
+            $sql .= ", avatar = :avatar";
+            $params['avatar'] = $avatar;
+        }
+        if ($password) {
+            $sql .= ", password = :password";
+            $params['password'] = password_hash($password, PASSWORD_DEFAULT);
+        }
+
+        $sql .= " WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute($params);
     }
 }

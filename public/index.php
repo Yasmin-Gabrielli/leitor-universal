@@ -10,9 +10,16 @@ $myBooks = $bookModel->getByUserId($_SESSION['user_id']);
 
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 mt-4 gap-4">
     <div>
-        <h2 class="text-3xl font-extrabold text-white">
-            Bem-vindo(a), <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600"><?= htmlspecialchars($_SESSION['user_name']); ?></span> 👋
-        </h2>
+        <a href="perfil.php" class="flex items-center gap-4 group">
+            <div class="w-16 h-16 rounded-2xl border-2 border-green-500/30 overflow-hidden bg-gray-800 shadow-lg group-hover:scale-105 transition-transform duration-300">
+                <img src="../uploads/avatars/<?= $_SESSION['avatar'] ?? 'default.png' ?>" 
+                     class="w-full h-full object-cover" 
+                     alt="Perfil">
+            </div>
+            <h2 class="text-3xl font-extrabold text-white">
+                Bem-vindo(a), <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600 group-hover:underline"><?= htmlspecialchars($_SESSION['user_name']); ?></span> 👋
+            </h2>
+        </a>
         <p class="text-gray-400 mt-1">O teu painel de leitura pessoal.</p>
     </div>
     <a href="upload.php" class="bg-green-500 text-gray-900 font-bold px-6 py-3 rounded-xl hover:bg-green-600 transition shadow-lg hover:shadow-green-500/30 flex items-center gap-2 flex-shrink-0">
@@ -45,12 +52,12 @@ $myBooks = $bookModel->getByUserId($_SESSION['user_id']);
         <a href="upload.php" class="inline-block mt-6 bg-gray-700 text-white font-bold px-6 py-2 rounded-lg hover:bg-gray-600 transition border border-gray-600">Fazer Upload Agora</a>
     </div>
 <?php else: ?>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 justify-items-center">
         <?php foreach ($myBooks as $book): ?>
             
-            <div class="bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-green-500/20 hover:-translate-y-1 transition-all duration-300 border border-gray-700 flex flex-col group">
+            <div class="w-full max-w-sm bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-green-500/20 hover:-translate-y-1 transition-all duration-300 border border-gray-700 flex flex-col group">
                 
-                <div class="h-48 relative flex items-center justify-center border-b border-gray-700 bg-gray-900 overflow-hidden group-hover:opacity-90 transition">
+                <div class="h-64 sm:h-80 relative flex items-center justify-center border-b border-gray-700 bg-gray-900 overflow-hidden group-hover:opacity-90 transition">
                     
                     <?php if($book['cover_path'] !== 'default_cover.png'): ?>
                         <img src="../<?= $book['cover_path'] ?>" class="w-full h-full object-cover" alt="Capa do Livro">
@@ -98,6 +105,15 @@ $myBooks = $bookModel->getByUserId($_SESSION['user_id']);
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
                     </a>
+
+                    <form action="excluir_livro.php" method="POST" onsubmit="return confirm('Tens a certeza que queres eliminar este livro? Todos os ficheiros serão apagados permanentemente.')" class="inline">
+                        <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
+                        <button type="submit" class="w-12 h-full flex items-center justify-center bg-gray-700 hover:bg-red-600 text-white border border-gray-600 rounded-xl transition-all duration-300 group" title="Excluir Livro">
+                            <svg class="w-5 h-5 text-gray-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </form>
                 </div>
                 </div>
             

@@ -39,7 +39,7 @@ class Favorite {
     // Traz todos os detalhes dos livros que o utilizador favoritou
     public function getFavoritedBooksDetails($userId) {
         // Fazemos um JOIN para juntar os Favoritos + Livros + Nome de quem fez upload
-        $sql = "SELECT b.*, u.name as uploader_name 
+        $sql = "SELECT b.*, u.name as uploader_name, u.avatar 
                 FROM books b
                 INNER JOIN favorites f ON b.id = f.book_id
                 INNER JOIN users u ON b.user_id = u.id

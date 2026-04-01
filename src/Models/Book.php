@@ -11,10 +11,10 @@ class Book {
     }
 
     // Salva o registro do livro no banco
-    public function create($userId, $title, $filePath, $type, $visibility) {
+    public function create($userId, $title, $filePath, $type, $visibility, $coverPath = 'default_cover.png') {
         $stmt = $this->db->prepare("
-            INSERT INTO books (user_id, title, file_path, type, visibility) 
-            VALUES (:user_id, :title, :file_path, :type, :visibility)
+            INSERT INTO books (user_id, title, file_path, type, visibility, cover_path) 
+            VALUES (:user_id, :title, :file_path, :type, :visibility, :cover_path)
         ");
         
         return $stmt->execute([
@@ -22,7 +22,8 @@ class Book {
             'title' => $title,
             'file_path' => $filePath,
             'type' => $type,
-            'visibility' => $visibility
+            'visibility' => $visibility,
+            'cover_path' => $coverPath
         ]);
     }
 
@@ -42,15 +43,18 @@ class Book {
     }
 
     // Busca todos os livros públicos de todos os utilizadores (Para o Feed)
-    public function getPublicBooks() {
+    public function getPublicBooks($limit = 12, $offset = 0) {
         // Usamos JOIN para ir buscar o nome do autor (utilizador) que fez o upload
         $stmt = $this->db->prepare("
-            SELECT books.*, users.name as uploader_name 
+            SELECT books.*, users.name as uploader_name, users.avatar 
             FROM books 
             JOIN users ON books.user_id = users.id 
             WHERE books.visibility = 'public' 
             ORDER BY books.created_at DESC
+            LIMIT :limit OFFSET :offset
         ");
+        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
     }
@@ -83,5 +87,11 @@ class Book {
                 'user_id' => $userId
             ]);
         }
+    }
+
+    // Remove o livro do banco de dados
+    public function delete($id, $userId) {
+        $stmt = $this->db->prepare("DELETE FROM books WHERE id = :id AND user_id = :user_id");
+        return $stmt->execute(['id' => $id, 'user_id' => $userId]);
     }
 }
